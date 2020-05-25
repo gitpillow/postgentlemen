@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/gitpillow/goji"
+	"github.com/gitpillow/postgentlemen/utils"
 	ui "github.com/gizak/termui/v3"
 	"github.com/gizak/termui/v3/widgets"
 	"log"
@@ -15,14 +16,17 @@ func main() {
 	}
 	defer ui.Close()
 
+
+
 	p := widgets.NewParagraph()
-	p.Text = "Hello World!"
+	p.Text = "test"
 	p.SetRect(0, 0, 25, 5)
 
 	ui.Render(p)
 
 	for e := range ui.PollEvents() {
 		if e.Type == ui.KeyboardEvent {
+			utils.PrintEvent(e)
 			break
 		}
 	}
