@@ -9,7 +9,6 @@ import (
 )
 
 var DBName = "pgmen.sqlite"
-
 var DB *gorm.DB
 var models []interface{}
 
@@ -18,6 +17,7 @@ func CreateDB() {
 		file, err := os.Create(DBName)
 		if err != nil {
 			fmt.Errorf("can not create sqlite db file: %v", DBName)
+			os.Exit(1)
 		}
 		file.Close()
 	}
@@ -28,6 +28,7 @@ func RemoveDB() {
 	err := os.RemoveAll(DBName)
 	if err != nil {
 		fmt.Errorf("remove db error: %v\n", err)
+		os.Exit(1)
 	}
 }
 
@@ -39,7 +40,9 @@ func GetDB() *gorm.DB {
 	db, err := gorm.Open("sqlite3", DBName)
 	if err != nil {
 		fmt.Errorf("can not connect to sqlite db: %v\n", DBName)
+		os.Exit(1)
 	}
+
 	DB = db
 	fmt.Printf("get db connection: %v\n", DBName)
 	return DB
