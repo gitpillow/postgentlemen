@@ -1,7 +1,7 @@
 package db
 
 import (
-	"fmt"
+	"github.com/gitpillow/postgentlemen/utils"
 	"github.com/jinzhu/gorm"
 	_ "github.com/mattn/go-sqlite3"
 	"os"
@@ -14,21 +14,20 @@ var models []interface{}
 
 func CreateDB() {
 	if !CheckDBExists() {
+		utils.Log.Infof("create db: %v", DBName)
 		file, err := os.Create(DBName)
 		if err != nil {
-			fmt.Errorf("can not create sqlite db file: %v", DBName)
-			os.Exit(1)
+			utils.Log.Fatalf("can not create sqlite db file: %v", DBName)
 		}
 		file.Close()
 	}
 }
 
 func RemoveDB() {
-	fmt.Printf("remove db: %v\n", DBName)
+	utils.Log.Infof("remove db: %v\n", DBName)
 	err := os.RemoveAll(DBName)
 	if err != nil {
-		fmt.Errorf("remove db error: %v\n", err)
-		os.Exit(1)
+		utils.Log.Fatalf("remove db error: %v\n", err)
 	}
 }
 
@@ -39,12 +38,11 @@ func GetDB() *gorm.DB {
 
 	db, err := gorm.Open("sqlite3", DBName)
 	if err != nil {
-		fmt.Errorf("can not connect to sqlite db: %v\n", DBName)
-		os.Exit(1)
+		utils.Log.Fatalf("can not connect to sqlite db: %v\n", DBName)
 	}
 
 	DB = db
-	fmt.Printf("get db connection: %v\n", DBName)
+	utils.Log.Infof("get db connection: %v", DBName)
 	return DB
 }
 
@@ -61,10 +59,10 @@ func Register(model interface{}) {
 }
 
 func Migrate() {
-	fmt.Printf("start to migrate %v models\n", len(models))
+	utils.Log.Infof("start to migrate %v models", len(models))
 	for _, model := range models {
-		fmt.Printf("migrate model: %v\n", reflect.TypeOf(model).Elem().Name())
+		utils.Log.Infof("migrate model: %v", reflect.TypeOf(model).Elem().Name())
 		GetDB().AutoMigrate(model)
 	}
-	fmt.Printf("migrate models done\n")
+	utils.Log.Infof("migrate models done")
 }

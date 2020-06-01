@@ -11,6 +11,10 @@ func init() {
 
 type Resource struct {
 	gorm.Model
+
+	Order int
+
+	Name      string
 	Url       string
 	Method    string
 	UrlParams string

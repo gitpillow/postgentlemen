@@ -10,7 +10,7 @@ func Quit(g *gocui.Gui, v *gocui.View) error {
 }
 
 func Load(g *gocui.Gui) {
-	g.SetManagerFunc(Layout)
+	Layout(g)
 
 	if err := g.SetKeybinding("", gocui.KeyCtrlC, gocui.ModNone, Quit); err != nil {
 		log.Panicln(err)
