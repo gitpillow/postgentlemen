@@ -6,6 +6,7 @@ require (
 	github.com/creack/pty v1.1.11 // indirect
 	github.com/gitpillow/goji v0.0.0-20200418082855-49179563d725
 	github.com/gizak/termui/v3 v3.1.0
+	github.com/go-resty/resty/v2 v2.3.0 // indirect
 	github.com/jinzhu/gorm v1.9.12
 	github.com/jroimartin/gocui v0.4.0
 	github.com/kr/pretty v0.2.0 // indirect

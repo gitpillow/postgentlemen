@@ -12,8 +12,8 @@ func InitZap() *zap.SugaredLogger {
 {
 	"level": "debug",
 	"encoding": "json",
-	"outputPaths": ["./pgman.log"],
-	"errorOutputPaths": ["stderr", "./pgman.error.log"],
+	"outputPaths": ["./pgmen.log"],
+	"errorOutputPaths": ["stderr", "./pgmen.error.log"],
 	"encoderConfig": {
 		"messageKey": "message",
 		"levelKey": "level",
