@@ -8,21 +8,28 @@ import (
 	"reflect"
 )
 
+// sqlite file name for rest resource restore
 var DBName = "pgmen.sqlite"
+
+// gorm db access
 var DB *gorm.DB
+
+// gorm entity models
 var models []interface{}
 
+// CreateDB create sqlite file if not exist
 func CreateDB() {
 	if !CheckDBExists() {
 		utils.Log.Infof("create db: %v", DBName)
-		file, err := os.Create(DBName)
+		f, err := os.Create(DBName)
 		if err != nil {
 			utils.Log.Fatalf("can not create sqlite db file: %v", DBName)
 		}
-		file.Close()
+		f.Close()
 	}
 }
 
+// RemoveDB delete sqlite file
 func RemoveDB() {
 	utils.Log.Infof("remove db: %v\n", DBName)
 	err := os.RemoveAll(DBName)
@@ -31,6 +38,16 @@ func RemoveDB() {
 	}
 }
 
+// CheckDBExists return if the sqlite db file exists
+func CheckDBExists() bool {
+	_, err := os.Stat(DBName)
+	if err == nil {
+		return true
+	}
+	return false
+}
+
+// GetDB return a gorm db access
 func GetDB() *gorm.DB {
 	if DB != nil {
 		return DB
@@ -46,18 +63,13 @@ func GetDB() *gorm.DB {
 	return DB
 }
 
-func CheckDBExists() bool {
-	_, err := os.Stat(DBName)
-	if err == nil {
-		return true
-	}
-	return false
-}
 
+// Register receive entity model from other package init() func
 func Register(model interface{}) {
 	models = append(models, model)
 }
 
+// Migrate create database structure by registered entity models
 func Migrate() {
 	utils.Log.Infof("start to migrate %v models", len(models))
 	for _, model := range models {
