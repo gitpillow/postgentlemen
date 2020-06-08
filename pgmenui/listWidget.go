@@ -37,29 +37,40 @@ func NewListWidget(x, y, ex, ey int) *ListWidget {
 func (w *ListWidget) Layout(g *gocui.Gui) error {
 	utils.Log.Infof("ListWidget Layout...")
 	v, err := g.SetView(w.name, w.x, w.y, w.ex, w.ey)
+	utils.Log.Infof("ListWidget Layout... view name is %v", v.Name())
 	if err != nil {
 		if err != gocui.ErrUnknownView {
 			return err
 		}
 
-		if err := g.SetKeybinding("", 'j', gocui.ModNone, down(w)); err != nil {
+		if err := g.SetKeybinding(v.Name(), 'j', gocui.ModNone, down(w)); err != nil {
 			return err
 		}
 
-		if err := g.SetKeybinding("", gocui.KeyArrowDown, gocui.ModNone, down(w)); err != nil {
+		if err := g.SetKeybinding(v.Name(), gocui.KeyArrowDown, gocui.ModNone, down(w)); err != nil {
 			return err
 		}
 
-		if err := g.SetKeybinding("", 'k', gocui.ModNone, up(w)); err != nil {
+		if err := g.SetKeybinding(v.Name(), 'k', gocui.ModNone, up(w)); err != nil {
 			return err
 		}
 
-		if err := g.SetKeybinding("", gocui.KeyArrowUp, gocui.ModNone, up(w)); err != nil {
+		if err := g.SetKeybinding(v.Name(), gocui.KeyArrowUp, gocui.ModNone, up(w)); err != nil {
 			return err
 		}
 
-		v.Autoscroll = true
+		if err := g.SetKeybinding(v.Name(), gocui.KeySpace, gocui.ModNone, pageDown(w)); err != nil {
+			return err
+		}
+
+		if err := g.SetKeybinding(w.name, 'b', gocui.ModNone, pageUp(w)); err != nil {
+			return err
+		}
+
+		//v.Autoscroll = true
 		v.Title = w.name
+
+		g.SetCurrentView(w.name)
 	}
 
 	v.Clear()
@@ -73,7 +84,7 @@ func (w *ListWidget) Layout(g *gocui.Gui) error {
 		nameTag := r.Name
 		item := mTag + nameTag
 		fmt.Fprintln(v, item)
-		utils.Log.Infof("ListWidget print: %v", item)
+		//utils.Log.Infof("ListWidget print: %v", item)
 	}
 
 	return nil
@@ -81,16 +92,68 @@ func (w *ListWidget) Layout(g *gocui.Gui) error {
 
 func down(w *ListWidget) func(*gocui.Gui, *gocui.View) error {
 	return func(gui *gocui.Gui, view *gocui.View) error {
-		w.active = (w.active + 1) % len(w.rs)
-		utils.Log.Debug("list up: %v", w.active)
+
+		w.active++
+		if w.active >= len(w.rs) {
+			w.active = len(w.rs) - 1
+		}
+
+		x, y := view.Origin()
+		_, he := view.Size()
+		utils.Log.Debugf("view (%v) origin (%v, %v), active (%v), height (%v)", view.Name(), x, y, w.active, he)
+
+		if w.active-y+1 > he {
+			err := pageDown(w)(gui, view)
+			if err != nil {
+				return err
+			}
+		}
+
+		utils.Log.Debugf("list down: %v", w.active)
 		return nil
 	}
 }
 
 func up(w *ListWidget) func(*gocui.Gui, *gocui.View) error {
 	return func(gui *gocui.Gui, view *gocui.View) error {
-		w.active = (w.active + len(w.rs) - 1) % len(w.rs)
-		utils.Log.Debug("list down: %v", w.active)
+		w.active--
+		if w.active < 0 {
+			w.active = 0
+		}
+
+		x, y := view.Origin()
+		_, he := view.Size()
+		utils.Log.Debug("view (%v) origin (%v, %v), active (%v), height (%v)", view.Name(), x, y, w.active, he)
+
+		if w.active < y {
+			err := pageUp(w)(gui, view)
+			if err != nil {
+				return err
+			}
+		}
+
+		utils.Log.Debugf("list up: %v", w.active)
+		return nil
+	}
+}
+
+func pageDown(w *ListWidget) func(*gocui.Gui, *gocui.View) error {
+	return func(gui *gocui.Gui, view *gocui.View) error {
+		x, y := view.Origin()
+		_, he := view.Size()
+		if y+1 <= len(w.rs)-he {
+			err := view.SetOrigin(x, y+1)
+			utils.Log.Debugf("list page down: %v, %v -> %v, %v: %v", x, y, x, y+1, err)
+		}
+		return nil
+	}
+}
+
+func pageUp(w *ListWidget) func(*gocui.Gui, *gocui.View) error {
+	return func(gui *gocui.Gui, view *gocui.View) error {
+		x, y := view.Origin()
+		err := view.SetOrigin(x, y-1)
+		utils.Log.Debugf("list page down: %v, %v -> %v, %v: %v", x, y, x, y+1, err)
 		return nil
 	}
 }

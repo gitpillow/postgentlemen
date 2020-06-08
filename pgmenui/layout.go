@@ -1,6 +1,7 @@
 package pgmenui
 
 import (
+	"github.com/gitpillow/postgentlemen/utils"
 	"github.com/jroimartin/gocui"
 	"log"
 )
@@ -10,7 +11,13 @@ func Layout(g *gocui.Gui) {
 
 	listWidget := NewListWidget(0, 0, maxX/3, maxY-1)
 	g.SetManager(listWidget)
-	g.SetCurrentView(listWidget.name)
+	utils.Log.Debugf("set current view: %v", listWidget.name)
+
+	view, err := g.SetCurrentView(listWidget.name)
+	if err != nil {
+		utils.Log.Errorf("set current view failed: %v, %v", view, listWidget.name)
+	}
+	utils.Log.Debugf("current view: %v", g.CurrentView())
 }
 
 func Quit(g *gocui.Gui, v *gocui.View) error {
