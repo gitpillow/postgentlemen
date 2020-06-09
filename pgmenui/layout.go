@@ -10,7 +10,9 @@ func Layout(g *gocui.Gui) {
 	maxX, maxY := g.Size()
 
 	listWidget := NewListWidget(0, 0, maxX/3, maxY-1)
-	g.SetManager(listWidget)
+	helpWidget := NewHelpWidget(maxX/3+1, 0, maxX-1, maxY-1)
+
+	g.SetManager(listWidget, helpWidget)
 	utils.Log.Debugf("set current view: %v", listWidget.name)
 
 	view, err := g.SetCurrentView(listWidget.name)
